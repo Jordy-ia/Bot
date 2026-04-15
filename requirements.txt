@@ -1,0 +1,4 @@
+fastapi
+uvicorn
+TikTokLive
+websockets
