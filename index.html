@@ -3,214 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikCustom Panel</title>
+    <title>TikCustom - Sticker Monitor</title>
     <style>
-        /* CONFIGURACIÓN VISUAL (CSS PURO) */
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #ff0050;
-            --accent-hover: #e60045;
-            --text: #f8fafc;
-            --border: #334155;
+            --bg: #0f172a; --card: #1e293b; --accent: #ff0050;
+            --text: #f8fafc; --border: #334155; --monitor: #020617;
         }
+        body { font-family: sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        nav { background-color: #000; padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        
+        /* ÁREA DE REGLAS */
+        .config-area { flex: 2; padding: 2rem; overflow-y: auto; }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        
+        /* MONITOR DE STICKERS (DERECHA) */
+        .monitor-area { flex: 1; background-color: var(--monitor); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+        .monitor-header { padding: 1rem; border-bottom: 1px solid var(--border); background: #111; font-weight: bold; color: var(--accent); }
+        #eventLog { flex: 1; padding: 1rem; font-family: monospace; font-size: 0.8rem; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 5px; }
+        .log-entry { padding: 8px; border-radius: 5px; background: #1e293b; border-left: 4px solid var(--accent); animation: slideIn 0.2s ease; }
+        
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-        }
-
-        nav {
-            background-color: #020617;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .header-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        /* BOTONES */
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
+        .btn { padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
         .btn-primary { background-color: var(--accent); color: white; }
-        .btn-primary:hover { background-color: var(--accent-hover); }
-
-        .btn-add { background-color: #4f46e5; color: white; font-size: 1rem; }
-
-        /* GRID Y TARJETAS */
-        #rulesGrid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .rule-card {
-            background-color: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            position: relative;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 0.7rem;
-            background-color: #0f172a;
-            border: 1px solid var(--border);
-            color: white;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            box-sizing: border-box;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #64748b;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        .delete-btn:hover { color: #f43f5e; }
-
-        .audio-box {
-            background-color: #020617;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px dashed var(--border);
-            text-align: center;
-        }
+        .btn-add { background-color: #4f46e5; color: white; }
+        
+        #rulesGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+        .rule-card { background-color: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+        select, input { width: 100%; padding: 0.5rem; background: #0f172a; border: 1px solid var(--border); color: white; border-radius: 5px; margin-top: 5px; }
+        .audio-box { margin-top: 10px; padding: 10px; background: #000; border-radius: 8px; text-align: center; border: 1px dashed #444; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div style="font-weight: 800; font-size: 1.2rem;">TIK<span style="color: var(--accent);">CUSTOM</span></div>
+        <div style="font-weight: 800;">TIK<span style="color: var(--accent);">CUSTOM</span></div>
         <div>
-            <input type="text" id="username" placeholder="@usuario" style="width: 150px; margin: 0; display: inline-block; padding: 0.4rem;">
-            <button class="btn btn-primary" onclick="connectLive()">Conectar</button>
+            <input type="text" id="username" placeholder="@usuario" style="width: 120px; background: #111; border: 1px solid #333; color: white; padding: 5px;">
+            <button class="btn btn-primary" style="padding: 5px 15px;" onclick="connectLive()">Conectar</button>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="header-actions">
-            <h2>Configurador</h2>
-            <button class="btn btn-add" onclick="addRule()">+ Nueva Regla</button>
+    <div class="main-layout">
+        <div class="config-area">
+            <div class="header-actions">
+                <h2 style="margin:0">Mis Reglas</h2>
+                <button class="btn btn-add" onclick="addRule()">+ Nueva Regla</button>
+            </div>
+            <div id="rulesGrid"></div>
         </div>
 
-        <div id="rulesGrid">
+        <div class="monitor-area">
+            <div class="monitor-header">📡 MONITOR DE STICKERS</div>
+            <div id="eventLog">
+                <div style="color: #666; text-align: center;">Esperando eventos del live...</div>
             </div>
+        </div>
     </div>
 
     <script>
         let rules = JSON.parse(localStorage.getItem('tikRules')) || [];
+        let socket;
 
-        // Función para conectar (Backend futuro)
         function connectLive() {
             const user = document.getElementById('username').value;
-            if(!user) return alert("Escribe un nombre de usuario");
-            alert("Conectando con el servidor para: " + user);
+            if(!user) return alert("Escribe el usuario");
+            
+            socket = new WebSocket(`wss://tu-app-render.onrender.com/ws/${user}`);
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                logEvent(data); // Enviamos al monitor
+                checkEvents(data); // Ejecutamos sonido
+            };
         }
 
-        // FUNCIÓN CLAVE: AÑADIR REGLA
+        // FUNCIÓN PARA VER QUÉ LLEGA (EL MONITOR)
+        function logEvent(data) {
+            const log = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = "log-entry";
+            
+            let content = "";
+            if(data.type === "gift") content = `🎁 REGALO: <b style="color:#ff0050">${data.gift}</b>`;
+            else if(data.type === "like") content = `❤️ LIKE de ${data.user}`;
+            else if(data.type === "comment") content = `💬 CHAT: ${data.text}`;
+            else content = `✨ EVENTO: ${data.type}`;
+
+            entry.innerHTML = `<small style="color:gray">${new Date().toLocaleTimeString()}</small><br>${content}`;
+            log.prepend(entry);
+        }
+
+        function checkEvents(data) {
+            rules.forEach(rule => {
+                let match = false;
+                if (rule.event === data.type) {
+                    if (rule.event === "gift" && data.gift.toLowerCase().includes(rule.condition.toLowerCase())) match = true;
+                    else if (rule.event === "comment" && data.text.toLowerCase().includes(rule.condition.toLowerCase())) match = true;
+                    else if (rule.event === "like" || rule.event === "follow") match = true;
+                }
+                if (match && rule.audioData) { new Audio(rule.audioData).play(); }
+            });
+        }
+
+        /* FUNCIONES DE GESTIÓN (Mantenemos tu lógica estable) */
         function addRule() {
-            console.log("Añadiendo...");
-            const newRule = {
-                id: Date.now(),
-                event: "gift",
-                condition: "Rosa",
-                audioName: "No seleccionado"
-            };
-            rules.push(newRule);
+            rules.push({ id: Date.now(), event: "gift", condition: "Rosa", audioName: "No seleccionado", audioData: null });
             saveAndRender();
         }
 
-        // FUNCIÓN CLAVE: BORRAR REGLA
         function deleteRule(id) {
             rules = rules.filter(r => r.id !== id);
             saveAndRender();
         }
 
-        // FUNCIÓN CLAVE: GUARDAR CAMBIOS
         function updateRule(id, field, value) {
             const rule = rules.find(r => r.id === id);
             if (rule) rule[field] = value;
             localStorage.setItem('tikRules', JSON.stringify(rules));
         }
 
-        // FUNCIÓN PARA RENDERIZAR TODO
-        function saveAndRender() {
-            localStorage.setItem('tikRules', JSON.stringify(rules));
-            const grid = document.getElementById('rulesGrid');
-            grid.innerHTML = "";
-
-            rules.forEach(rule => {
-                const card = document.createElement('div');
-                card.className = 'rule-card';
-                card.innerHTML = `
-                    <div class="card-header">
-                        <span style="font-size: 0.7rem; color: #64748b;">ID: ${rule.id}</span>
-                        <button class="delete-btn" onclick="deleteRule(${rule.id})">✕</button>
-                    </div>
-                    <label style="font-size: 0.8rem;">Evento:</label>
-                    <select onchange="updateRule(${rule.id}, 'event', this.value)">
-                        <option value="gift" ${rule.event === 'gift' ? 'selected' : ''}>Regalo</option>
-                        <option value="comment" ${rule.event === 'comment' ? 'selected' : ''}>Chat</option>
-                    </select>
-                    
-                    <label style="font-size: 0.8rem;">Condición:</label>
-                    <input type="text" value="${rule.condition}" onchange="updateRule(${rule.id}, 'condition', this.value)">
-                    
-                    <div class="audio-box">
-                        <div style="font-size: 0.7rem; margin-bottom: 0.5rem; color: #94a3b8;">${rule.audioName}</div>
-                        <button class="btn btn-primary" style="font-size: 0.7rem; padding: 0.4rem;" onclick="document.getElementById('file-${rule.id}').click()">Subir Audio</button>
-                        <input type="file" id="file-${rule.id}" style="display:none" onchange="uploadAudio(${rule.id}, this)">
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
         function uploadAudio(id, input) {
             const file = input.files[0];
             if (file) {
-                const rule = rules.find(r => r.id === id);
-                rule.audioName = file.name;
-                // Aquí podrías guardar el audio en Base64 o URL temporal
-                saveAndRender();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const rule = rules.find(r => r.id === id);
+                    rule.audioName = file.name;
+                    rule.audioData = e.target.result;
+                    saveAndRender();
+                };
+                reader.readAsDataURL(file);
             }
         }
 
-        // Iniciar al cargar
+        function saveAndRender() {
+            localStorage.setItem('tikRules', JSON.stringify(rules));
+            const grid = document.getElementById('rulesGrid');
+            grid.innerHTML = rules.map(rule => `
+                <div class="rule-card">
+                    <div style="display:flex; justify-content:space-between">
+                        <select style="width:70%; margin:0" onchange="updateRule(${rule.id}, 'event', this.value)">
+                            <option value="gift" ${rule.event === 'gift' ? 'selected' : ''}>🎁 Regalo</option>
+                            <option value="like" ${rule.event === 'like' ? 'selected' : ''}>❤️ Like</option>
+                            <option value="comment" ${rule.event === 'comment' ? 'selected' : ''}>💬 Chat</option>
+                        </select>
+                        <button onclick="deleteRule(${rule.id})" style="background:none; border:none; color:red; cursor:pointer">✕</button>
+                    </div>
+                    <input type="text" value="${rule.condition}" placeholder="Nombre del sticker..." onchange="updateRule(${rule.id}, 'condition', this.value)">
+                    <div class="audio-box">
+                        <small style="display:block; margin-bottom:5px; color:gray">${rule.audioName}</small>
+                        <button class="btn btn-primary" style="font-size:0.6rem; padding:5px" onclick="document.getElementById('f-${rule.id}').click()">Cargar Audio</button>
+                        <input type="file" id="f-${rule.id}" style="display:none" onchange="uploadAudio(${rule.id}, this)">
+                    </div>
+                </div>
+            `).join('');
+        }
         window.onload = saveAndRender;
     </script>
 </body>
