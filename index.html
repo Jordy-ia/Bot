@@ -71,7 +71,7 @@
             const user = document.getElementById('username').value;
             if(!user) return alert("Escribe el usuario");
             
-            socket = new WebSocket(`wss://tu-app-render.onrender.com/ws/${user}`);
+            socket = new WebSocket(`wss://bot-xqve.onrender.com/ws/${user}`);
 
             socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
