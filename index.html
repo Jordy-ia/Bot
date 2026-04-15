@@ -1,3 +1,217 @@
-<html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikCustom Panel</title>
+    <style>
+        /* CONFIGURACIÓN VISUAL (CSS PURO) */
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #ff0050;
+            --accent-hover: #e60045;
+            --text: #f8fafc;
+            --border: #334155;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #020617;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        /* BOTONES */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary { background-color: var(--accent); color: white; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+
+        .btn-add { background-color: #4f46e5; color: white; font-size: 1rem; }
+
+        /* GRID Y TARJETAS */
+        #rulesGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .rule-card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.7rem;
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover { color: #f43f5e; }
+
+        .audio-box {
+            background-color: #020617;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px dashed var(--border);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div style="font-weight: 800; font-size: 1.2rem;">TIK<span style="color: var(--accent);">CUSTOM</span></div>
+        <div>
+            <input type="text" id="username" placeholder="@usuario" style="width: 150px; margin: 0; display: inline-block; padding: 0.4rem;">
+            <button class="btn btn-primary" onclick="connectLive()">Conectar</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-actions">
+            <h2>Configurador</h2>
+            <button class="btn btn-add" onclick="addRule()">+ Nueva Regla</button>
+        </div>
+
+        <div id="rulesGrid">
+            </div>
+    </div>
+
+    <script>
+        let rules = JSON.parse(localStorage.getItem('tikRules')) || [];
+
+        // Función para conectar (Backend futuro)
+        function connectLive() {
+            const user = document.getElementById('username').value;
+            if(!user) return alert("Escribe un nombre de usuario");
+            alert("Conectando con el servidor para: " + user);
+        }
+
+        // FUNCIÓN CLAVE: AÑADIR REGLA
+        function addRule() {
+            console.log("Añadiendo...");
+            const newRule = {
+                id: Date.now(),
+                event: "gift",
+                condition: "Rosa",
+                audioName: "No seleccionado"
+            };
+            rules.push(newRule);
+            saveAndRender();
+        }
+
+        // FUNCIÓN CLAVE: BORRAR REGLA
+        function deleteRule(id) {
+            rules = rules.filter(r => r.id !== id);
+            saveAndRender();
+        }
+
+        // FUNCIÓN CLAVE: GUARDAR CAMBIOS
+        function updateRule(id, field, value) {
+            const rule = rules.find(r => r.id === id);
+            if (rule) rule[field] = value;
+            localStorage.setItem('tikRules', JSON.stringify(rules));
+        }
+
+        // FUNCIÓN PARA RENDERIZAR TODO
+        function saveAndRender() {
+            localStorage.setItem('tikRules', JSON.stringify(rules));
+            const grid = document.getElementById('rulesGrid');
+            grid.innerHTML = "";
+
+            rules.forEach(rule => {
+                const card = document.createElement('div');
+                card.className = 'rule-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span style="font-size: 0.7rem; color: #64748b;">ID: ${rule.id}</span>
+                        <button class="delete-btn" onclick="deleteRule(${rule.id})">✕</button>
+                    </div>
+                    <label style="font-size: 0.8rem;">Evento:</label>
+                    <select onchange="updateRule(${rule.id}, 'event', this.value)">
+                        <option value="gift" ${rule.event === 'gift' ? 'selected' : ''}>Regalo</option>
+                        <option value="comment" ${rule.event === 'comment' ? 'selected' : ''}>Chat</option>
+                    </select>
+                    
+                    <label style="font-size: 0.8rem;">Condición:</label>
+                    <input type="text" value="${rule.condition}" onchange="updateRule(${rule.id}, 'condition', this.value)">
+                    
+                    <div class="audio-box">
+                        <div style="font-size: 0.7rem; margin-bottom: 0.5rem; color: #94a3b8;">${rule.audioName}</div>
+                        <button class="btn btn-primary" style="font-size: 0.7rem; padding: 0.4rem;" onclick="document.getElementById('file-${rule.id}').click()">Subir Audio</button>
+                        <input type="file" id="file-${rule.id}" style="display:none" onchange="uploadAudio(${rule.id}, this)">
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function uploadAudio(id, input) {
+            const file = input.files[0];
+            if (file) {
+                const rule = rules.find(r => r.id === id);
+                rule.audioName = file.name;
+                // Aquí podrías guardar el audio en Base64 o URL temporal
+                saveAndRender();
+            }
+        }
+
+        // Iniciar al cargar
+        window.onload = saveAndRender;
+    </script>
+</body>
 </html>
